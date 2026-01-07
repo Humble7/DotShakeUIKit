@@ -16,7 +16,10 @@ class ViewController: UIViewController {
         return table
     }()
 
-    private let demos = ["DotShakeToolbar Example"]
+    private let demos = [
+        "DotShakeToolbar",
+        "DotShakeKnob"
+    ]
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -56,13 +59,16 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
 
+        let vc: UIViewController
         switch indexPath.row {
         case 0:
-            let vc = ToolbarDemoVC()
-            navigationController?.pushViewController(vc, animated: true)
+            vc = ToolbarDemoVC()
+        case 1:
+            vc = DotShakeKnobDemoVC()
         default:
-            break
+            return
         }
+        navigationController?.pushViewController(vc, animated: true)
     }
 }
 
