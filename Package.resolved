@@ -1,0 +1,15 @@
+{
+  "originHash" : "5d49da01585a55017cfad5f2866bb7ae0cf0ec7a2d16771681b029905e499f80",
+  "pins" : [
+    {
+      "identity" : "foundationkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Humble7/FoundationKit",
+      "state" : {
+        "revision" : "a203c172ef15718bee4ae56ac7c791d98dd82428",
+        "version" : "0.0.1"
+      }
+    }
+  ],
+  "version" : 3
+}

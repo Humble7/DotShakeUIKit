@@ -20,12 +20,19 @@ let package = Package(
             targets: ["DotShakeToolbar"]),
     ],
     dependencies: [
-        .package(path: "../FoundationKit")
+        .package(url: "https://github.com/Humble7/FoundationKit", from: "0.0.1"),
     ],
     targets: [
         .target(
             name: "DotShakeUIKit",
-            dependencies: ["FoundationKit", "DotShakeKnob", "DotShakeToolbar"]
+            dependencies: [
+                "DotShakeKnob",
+                "DotShakeToolbar",
+                .product(
+                    name: "FoundationKit",
+                    package: "FoundationKit"
+                )
+            ]
         ),
         
         .target(
