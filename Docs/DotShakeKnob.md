@@ -1,6 +1,24 @@
 # DotShakeKnob
 
+[![Swift 6.1+](https://img.shields.io/badge/Swift-6.1+-orange.svg)](https://swift.org)
+[![iOS 17+](https://img.shields.io/badge/iOS-17+-blue.svg)](https://developer.apple.com/ios/)
+[![SPM Compatible](https://img.shields.io/badge/SPM-Compatible-green.svg)](https://swift.org/package-manager/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+
+<p align="center">
+  <img src="../Assets/0-knob.png" width="600" />
+</p>
+
+
+
 A feature-rich rotatable knob/dial control for iOS with visual markers, haptic feedback, snap behavior, and persistence support.
+
+### Used By
+
+<a href="https://apps.apple.com/au/app/dotshake/id6747894313">
+  <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us" alt="Download DotShake" height="40">
+</a>
 
 ## Features
 
@@ -11,6 +29,16 @@ A feature-rich rotatable knob/dial control for iOS with visual markers, haptic f
 - Center tap to add/remove markers
 - Persistent storage for markers via UserDefaults
 - Hard stop at boundaries (prevents jumping across gap)
+
+## Showcase
+
+Apps using DotShakeToolbar in production:
+
+| App | Description |
+|-----|-------------|
+| [DotShake](https://apps.apple.com/au/app/dotshake/id6747894313) | A delightful drawing app for iOS |
+
+> Using DotShakeKnob in your app? Feel free to open a PR to add it here!
 
 ## Installation
 

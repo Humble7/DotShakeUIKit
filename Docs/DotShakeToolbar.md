@@ -5,6 +5,12 @@
 [![SPM Compatible](https://img.shields.io/badge/SPM-Compatible-green.svg)](https://swift.org/package-manager/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+<p align="center">
+  <img src="../Assets/0-app-screenShot.png" width="600" />
+</p>
+
+
+
 Glass style custom toolbar built with UIKit and Auto Layout.
 
 Supports side floating buttons, bottom accessory views, and space-adaptive layouts.
