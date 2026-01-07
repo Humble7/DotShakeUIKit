@@ -1,14 +1,16 @@
 # DotShakeUIKit
 
-A comprehensive iOS UIKit framework package providing reusable UI components and utilities for iOS 17+.
+A comprehensive iOS UIKit framework providing reusable UI components, rotatable knob controls, and an advanced glass-style floating toolbar system.
 
 ## Overview
 
-DotShakeUIKit is a Swift Package that provides three distinct libraries:
+DotShakeUIKit is a Swift Package that provides three libraries:
 
-- **DotShakeUIKit** - Core reusable UI utilities and components
-- **DotShakeKnob** - Rotatable knob/dial control with marker support
-- **DotShakeToolbar** - Advanced "Glass" style floating toolbar system
+| Library | Description |
+|---------|-------------|
+| **DotShakeUIKit** | Core UI utilities and components (re-exports DotShakeKnob and DotShakeToolbar) |
+| **DotShakeKnob** | Rotatable knob/dial control with marker support and haptic feedback |
+| **DotShakeToolbar** | Glass-style floating toolbar with responsive layout system |
 
 ## Requirements
 
@@ -20,21 +22,24 @@ DotShakeUIKit is a Swift Package that provides three distinct libraries:
 
 ### Swift Package Manager
 
-Add the following to your `Package.swift` file:
+Add the following to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/your-repo/DotShakeUIKit.git", from: "1.0.0")
+    .package(url: "https://github.com/Humble7/DotShakeUIKit.git", from: "1.0.0")
 ]
 ```
 
-Then add the desired products to your target:
+Then add the products to your target:
 
 ```swift
 .target(
     name: "YourTarget",
     dependencies: [
+        // Option 1: Import all libraries at once
         .product(name: "DotShakeUIKit", package: "DotShakeUIKit"),
+
+        // Option 2: Import individual libraries
         .product(name: "DotShakeKnob", package: "DotShakeUIKit"),
         .product(name: "DotShakeToolbar", package: "DotShakeUIKit"),
     ]
@@ -43,30 +48,33 @@ Then add the desired products to your target:
 
 ## DotShakeUIKit (Core Module)
 
-Provides reusable UIKit utilities and base components.
+The core module provides reusable UIKit utilities and re-exports both DotShakeKnob and DotShakeToolbar.
 
 ### UIFeedbackManager
 
-Centralized feedback UI management with loading and alert controllers.
+Centralized feedback UI management for loading indicators and alerts.
 
 ```swift
-// Show loading indicator
+// Show/hide loading indicator
 UIFeedbackManager.shared.loading.show()
 UIFeedbackManager.shared.loading.show(text: "Loading...")
-
-// Hide loading indicator
+UIFeedbackManager.shared.loading.update(text: "Processing...")
 UIFeedbackManager.shared.loading.hide()
 
-// Show alert
+// Show alert dialog
 UIFeedbackManager.shared.alert.show(
     title: "Error",
-    message: "Something went wrong"
+    message: "Something went wrong",
+    confirmTitle: "OK",
+    cancelTitle: "Cancel",
+    onConfirm: { print("Confirmed") },
+    onCancel: { print("Cancelled") }
 )
 ```
 
-### Base Classes
+### Base Classes for Programmatic UI
 
-**NiblessViewController** - Base class for programmatic view controllers:
+**NiblessViewController** - Base class that prevents XIB/Storyboard initialization:
 
 ```swift
 class MyViewController: NiblessViewController {
@@ -91,139 +99,185 @@ class MyCustomView: NiblessView {
 ### UIViewController Extensions
 
 ```swift
-// Find topmost view controller
+// Find the topmost presented view controller
 let topVC = viewController.topViewController()
 
-// Add child view controller (full screen)
+// Child view controller management
 parentVC.addFullScreen(childViewController: childVC)
-
-// Remove child view controller
+parentVC.add(childViewController: childVC) { childView in
+    // Custom constraints
+}
 parentVC.remove(childViewController: childVC)
 
 // Present share sheet
-viewController.presentActivityVC(with: shareItems)
+viewController.presentActivityVC(with: [shareItems])
 
-// Present error alert
+// Present error (requires FoundationKit.ErrorMessage)
 viewController.present(errorMessage: error)
 ```
 
 ### SwipeDetectingButton
 
-A UIButton subclass that distinguishes between tap and swipe gestures:
+A UIButton that distinguishes between tap and swipe gestures:
 
 ```swift
 let button = SwipeDetectingButton()
-button.swipeThreshold = 30 // minimum distance to trigger swipe
+button.swipeThreshold = 30 // minimum distance to trigger swipe (default: 30)
 
 button.onTap = {
-    print("Button tapped")
+    print("Tapped")
 }
 
 button.onSwipe = {
-    print("Button swiped")
+    print("Swiped")
 }
 ```
 
 ### TransparentPassthroughView
 
-A UIView that can selectively pass touches through:
+A view that passes touches through to subviews only:
 
 ```swift
-let overlayView = TransparentPassthroughView()
-overlayView.isPassthroughEnabled = true // touches pass through to subviews only
+let overlay = TransparentPassthroughView()
+overlay.isPassthroughEnabled = true  // touches pass through, only subviews receive touches
 ```
+
+---
 
 ## DotShakeKnob
 
-A feature-rich rotatable knob/dial control with visual markers, haptic feedback, and snapping behavior.
+A feature-rich rotatable knob/dial control with visual markers, haptic feedback, and persistence support.
 
 ### Basic Knob
 
 ```swift
 let knob = Knob()
+
+// Value range
 knob.minimumValue = 0
 knob.maximumValue = 100
+
+// Continuous updates during gesture
 knob.isContinuous = true
-
-// Styling
-knob.trackStyle = .drawing(lineWidth: 2, color: .systemGray)
-knob.pointerStyle = .drawing(length: 12, lineWidth: 2, color: .systemBlue)
-
-// Or use images
-knob.trackStyle = .image(trackImage, contentMode: .scaleAspectFit)
-knob.pointerStyle = .image(pointerImage, size: CGSize(width: 20, height: 20))
-
-// Haptic feedback
-knob.hapticStyle = .stepAndBoundary
-knob.stepInterval = 10
-knob.stepFeedbackIntensity = 0.5
-knob.boundaryFeedbackIntensity = 1.0
 
 // Set value
 knob.setValue(50, animated: true)
 
 // Listen for changes
-knob.addTarget(self, action: #selector(knobValueChanged), for: .valueChanged)
-knob.addTarget(self, action: #selector(knobEditingEnded), for: .editingDidEnd)
+knob.addTarget(self, action: #selector(valueChanged), for: .valueChanged)
+knob.addTarget(self, action: #selector(editingEnded), for: .editingDidEnd)
 ```
 
-### MarkedKnob (with Markers)
+### Styling
+
+```swift
+// Track style (the circular arc)
+knob.trackStyle = .drawing(lineWidth: 2, color: .systemGray)
+// Or use an image
+knob.trackStyle = .image(trackImage, contentMode: .scaleAspectFit)
+
+// Pointer style (the indicator)
+knob.pointerStyle = .drawing(length: 12, lineWidth: 2, color: .systemBlue)
+// Or use an image
+knob.pointerStyle = .image(pointerImage, size: CGSize(width: 20, height: 20))
+
+// Angular range (in radians)
+knob.startAngle = -.pi * 11/8  // default
+knob.endAngle = .pi * 3/8      // default
+```
+
+### Haptic Feedback
+
+```swift
+// Feedback styles: .none, .step, .boundary, .stepAndBoundary
+knob.hapticStyle = .stepAndBoundary
+
+// Step feedback triggers every stepInterval
+knob.stepInterval = 10
+knob.stepFeedbackIntensity = 0.4  // 0.0 - 1.0
+
+// Boundary feedback when hitting min/max
+knob.boundaryFeedbackIntensity = 0.7
+```
+
+### MarkedKnob (Knob with Visual Markers)
 
 ```swift
 let markedKnob = MarkedKnob()
 
+// Access the underlying knob
+markedKnob.minimumValue = 0
+markedKnob.maximumValue = 100
+
 // Add markers
+markedKnob.addMarkerAtCurrentPosition()
 markedKnob.addMarker(at: 25, color: .red, length: 10, lineWidth: 2)
-markedKnob.addMarker(at: 50, color: .green, length: 10, lineWidth: 2)
-markedKnob.addMarkerAtCurrentPosition() // Add marker at current value
+markedKnob.addMarker(at: 50)  // uses markerStyle defaults
 
 // Remove markers
-markedKnob.removeMarker(at: 25)
+markedKnob.removeMarker(at: 0)  // by index
 markedKnob.removeAllMarkers()
+
+// Marker style (defaults for new markers)
+markedKnob.markerStyle = MarkerStyle(
+    color: .systemRed,
+    length: 15,
+    lineWidth: 2,
+    tolerance: 0.02  // how close to marker to detect
+)
 
 // Snap behavior
 markedKnob.snapBehavior = SnapBehavior(
     enabled: true,
-    threshold: 5.0,
+    threshold: 0.05,  // snap distance
     animated: true
 )
+// Or use presets
+markedKnob.snapBehavior = .default
+markedKnob.snapBehavior = .disabled
 
-// Marker style
-markedKnob.markerStyle = MarkerStyle(
-    color: .systemOrange,
-    length: 12,
+// Center symbol style (+/- indicator)
+markedKnob.symbolStyle = SymbolStyle(
+    color: .systemBlue,
+    activeColor: .systemRed,
+    size: 20,
     lineWidth: 2,
-    tolerance: 0.5
+    tapRadius: 22
 )
 
 // Listen for marker changes
 markedKnob.onMarkersChanged = { markers in
-    print("Markers updated: \(markers.count)")
+    print("Markers: \(markers.count)")
 }
 ```
 
-### MarkerStorage (Persistence)
+### Marker Persistence
 
 ```swift
-// Save markers
-await MarkerStorage.shared.save(markers, forKey: "myKnob")
+// Save/load markers manually
+Task {
+    await MarkerStorage.shared.save(markers, forKey: "myKnob")
+    let loaded = await MarkerStorage.shared.load(forKey: "myKnob")
+    await MarkerStorage.shared.clear(forKey: "myKnob")
+}
 
-// Load markers
-let markers = await MarkerStorage.shared.load(forKey: "myKnob")
-
-// Clear saved markers
-await MarkerStorage.shared.clear(forKey: "myKnob")
+// Auto-binding (automatically saves/loads markers)
+let binding = markedKnob.bindStorage(key: "myKnob")
+// Later: binding.unbind() or await binding.clear()
 ```
+
+---
 
 ## DotShakeToolbar
 
-An advanced floating toolbar system with glass morphism design, multiple display modes, and accessory views.
+An advanced floating toolbar system with glass morphism design, responsive layout, and accessory views.
 
 ### Basic Setup
 
 ```swift
 let toolbar = GlassToolbarController(configuration: .default)
 
+// Define items
 let items = [
     GlassToolbarItem(
         title: "Home",
@@ -244,11 +298,13 @@ let items = [
 ]
 
 toolbar.setItems(items)
+
+// Selection callback
 toolbar.onItemSelected = { index in
     print("Selected: \(index)")
 }
 
-// Add to parent
+// Add to parent view controller
 addChild(toolbar)
 view.addSubview(toolbar.view)
 toolbar.didMove(toParent: self)
@@ -258,24 +314,29 @@ toolbar.didMove(toParent: self)
 ### Configuration Presets
 
 ```swift
-// Standard configuration (56pt toolbar height)
+// Standard (56pt toolbar height)
 let toolbar = GlassToolbarController(configuration: .default)
 
-// Compact for smaller screens (48pt toolbar)
+// Compact for smaller screens (48pt)
 let compactToolbar = GlassToolbarController(configuration: .compact)
 
-// Spacious for iPad (64pt toolbar)
+// Spacious for iPad (64pt)
 let iPadToolbar = GlassToolbarController(configuration: .spacious)
 ```
 
-### Toolbar Items with Priority
+### Item Priority System
+
+Items can be assigned priorities that determine their behavior during layout compression:
 
 ```swift
 GlassToolbarItem(
     title: "Primary",
     icon: icon,
     isSelectable: true,
-    priority: .primary,      // Always visible
+    priority: .essential,    // Always visible, never hidden
+    // priority: .primary,   // Shown preferentially (default)
+    // priority: .secondary, // Hidden first when space is limited
+    // priority: .overflow,  // Always in overflow menu
     compactTitle: "Pri",     // Short title for compressed layouts
     canHideTitle: true       // Allow title hiding when compressed
 )
@@ -284,12 +345,14 @@ GlassToolbarItem(
 ### Side Button
 
 ```swift
-// Global side button for all items
+// Global side button (used for all items without their own)
 toolbar.globalSideButton = GlassSideButtonConfig(
     icon: UIImage(systemName: "plus"),
     backgroundColor: .systemBlue,
     tintColor: .white,
-    action: { print("Add tapped") }
+    priority: .primary,      // .essential, .primary, .secondary
+    overflowTitle: "Add",    // Title shown in overflow menu
+    action: { print("Add") }
 )
 
 // Per-item side button (overrides global)
@@ -300,7 +363,7 @@ GlassToolbarItem(
         icon: UIImage(systemName: "camera"),
         backgroundColor: .systemGreen,
         gestures: SideButtonGestureConfig(
-            onTap: { print("Camera tapped") },
+            onTap: { print("Camera") },
             onSwipe: { direction in
                 switch direction {
                 case .up: print("Swipe up")
@@ -309,7 +372,9 @@ GlassToolbarItem(
                 case .right: print("Swipe right")
                 }
             },
-            enabledDirections: [.up, .down]
+            enabledDirections: [.up, .down],
+            swipeThreshold: 30,
+            swipeVelocityThreshold: 200
         )
     )
 )
@@ -318,23 +383,27 @@ GlassToolbarItem(
 toolbar.updateSideButtonAppearance(
     icon: UIImage(systemName: "checkmark"),
     backgroundColor: .systemGreen,
+    tintColor: .white,
     animated: true
 )
 ```
 
 ### Accessory Views
 
-```swift
-// Simple accessory from any UIView
-let myView = UIView()
-let accessory = myView.asAccessoryProvider(preferredHeight: 60)
+Accessory views appear below the toolbar when an item is selected:
 
-// Or use SimpleAccessoryWrapper
-let accessory = SimpleAccessoryWrapper(
+```swift
+// Create accessory from any UIView
+let myView = UIView()
+let accessory = myView.asAccessoryProvider(height: 60, width: nil)
+
+// Or use SimpleAccessoryWrapper for more control
+let wrapper = SimpleAccessoryWrapper(
     view: myView,
     preferredHeight: 60,
-    preferredWidth: nil,  // nil = fill available width
-    minimumWidth: 200
+    preferredWidth: nil,    // nil = fill available width
+    minimumWidth: 200,
+    cleanup: { /* cleanup code */ }
 )
 
 // Attach to item
@@ -342,7 +411,7 @@ GlassToolbarItem(
     title: "Music",
     icon: UIImage(systemName: "music.note"),
     accessoryProvider: primaryAccessory,
-    secondaryAccessoryProvider: secondaryAccessory  // Optional secondary
+    secondaryAccessoryProvider: secondaryAccessory  // optional second accessory
 )
 
 // Global accessory (fallback for items without one)
@@ -352,7 +421,7 @@ toolbar.globalAccessoryProvider = defaultAccessory
 ### HorizontalListAccessoryView (Built-in)
 
 ```swift
-let listAccessory = HorizontalListAccessoryView()
+let listView = HorizontalListAccessoryView()
 
 let items = [
     HorizontalListAccessoryView.ListItem(
@@ -367,81 +436,126 @@ let items = [
     )
 ]
 
-listAccessory.configure(
+listView.configure(
     title: "Categories",
     items: items,
     selectedIndex: 0,
     configuration: .init(
         showsSelection: true,
         showsCount: true,
-        selectionColor: .systemBlue
+        selectionColor: .systemBlue,
+        borderColor: nil  // defaults to selectionColor
     )
 )
 
-listAccessory.onItemTap = { index in
-    print("Selected category: \(index)")
+listView.onItemTap = { index in
+    print("Selected: \(index)")
+}
+
+// Dynamic updates
+listView.updateSelectionColor(.systemRed)
+listView.updateBorderColor(.systemOrange)
+```
+
+### Custom Accessory Provider
+
+Implement `GlassAccessoryProvider` for full control:
+
+```swift
+class MyAccessoryProvider: GlassAccessoryProvider {
+    let accessoryView: UIView = MyCustomView()
+    let preferredHeight: CGFloat = 80
+    var preferredWidth: CGFloat? { nil }  // fill available
+    var minimumWidth: CGFloat { 200 }
+
+    func willAppear(animated: Bool) { /* prepare */ }
+    func didAppear(animated: Bool) { /* shown */ }
+    func willDisappear(animated: Bool) { /* hiding */ }
+    func didDisappear(animated: Bool) { /* hidden */ }
+    func cleanup() { /* release resources */ }
 }
 ```
 
 ### Ultra Minimal Mode
 
 ```swift
-// Enable ultra minimal mode
+// Enable/disable
 toolbar.setUltraMinimalMode(true, animated: true)
-
-// Toggle
 toolbar.toggleUltraMinimalMode(animated: true)
 
-// Check current state
+// Check state
 if toolbar.isUltraMinimalMode {
-    // Handle minimal mode
+    // In minimal mode
 }
 ```
 
 ### Layout Monitoring
 
 ```swift
-// Current layout tier
+// Current space tier
 switch toolbar.currentSpaceTier {
-case .spacious: print("Full layout")
-case .regular: print("Standard layout")
-case .compressed: print("Compressed layout")
-case .tight: print("Minimal layout with overflow")
+case .spacious: print("Full layout")      // >= 520pt
+case .regular: print("Standard")          // 420-519pt
+case .compact: print("Compact")           // 360-419pt
+case .tight: print("Tight")               // 280-359pt
+case .minimal: print("Ultra minimal")     // < 280pt
+}
+
+// Current compression level
+switch toolbar.currentCompressionLevel {
+case .full: print("Full display + title")
+case .comfortable: print("Standard spacing")
+case .compact: print("Compact spacing")
+case .iconOnly: print("Icons only")
+case .overflow: print("Items in overflow")
 }
 
 // Items in overflow menu
-let overflowItems = toolbar.overflowItems
+let hidden = toolbar.overflowItems
 ```
 
 ### Custom Appearance
 
 ```swift
-var appearance = ToolbarAppearanceConfiguration.default
+var config = ToolbarAppearanceConfiguration.default
 
 // Sizes
-appearance.toolbarHeight = 60
-appearance.floatingButtonSize = 48
-appearance.itemIconSize = 24
+config.toolbarHeight = 60
+config.floatingButtonSize = 48
+config.itemIconSize = 24
+config.itemFullSize = CGSize(width: 56, height: 48)
+config.itemCompactSize = CGSize(width: 44, height: 48)
 
 // Animation
-appearance.animationDuration = 0.3
-appearance.springDamping = 0.8
+config.animationDuration = 0.35
+config.springDamping = 0.85
+config.springVelocity = 0.5
 
 // Visual effects
-appearance.toolbarCornerRadius = 20
-appearance.toolbarShadowRadius = 10
-appearance.toolbarShadowOpacity = 0.15
+config.toolbarCornerRadius = nil  // nil = automatic (height / 2)
+config.toolbarShadowRadius = 20
+config.toolbarShadowOpacity = 0.18
+config.accessoryCornerRadius = 20
 
-let toolbar = GlassToolbarController(configuration: appearance)
+// Glass effect
+config.glossTopAlpha = 0.28
+config.glossMiddleAlpha = 0.08
+config.borderTopAlpha = 0.5
+config.borderBottomAlpha = 0.15
+
+let toolbar = GlassToolbarController(configuration: config)
 ```
+
+---
 
 ## Architecture
 
 ```
 DotShakeUIKit
 ├── DotShakeUIKit (Core)
-│   ├── UIFeedbackManager
+│   ├── UIFeedbackManager (LoadingController, AlertController)
 │   ├── NiblessViewController / NiblessView
+│   ├── UIViewController Extensions
 │   ├── SwipeDetectingButton
 │   └── TransparentPassthroughView
 │
@@ -449,12 +563,15 @@ DotShakeUIKit
 │   ├── Knob (UIControl)
 │   ├── MarkedKnob (UIControl)
 │   ├── RotationGestureRecognizer
-│   └── MarkerStorage (Actor)
+│   ├── MarkerStorage (Actor)
+│   └── MarkerBinding
 │
 └── DotShakeToolbar
     ├── GlassToolbarController
-    ├── GlassToolbarItem / GlassSideButtonConfig
+    ├── GlassToolbarItem
+    ├── GlassSideButtonConfig / SideButtonGestureConfig
     ├── GlassAccessoryProvider Protocol
+    ├── SimpleAccessoryWrapper
     ├── HorizontalListAccessoryView
     ├── ToolbarLayoutCoordinator
     └── ToolbarAppearanceConfiguration
@@ -465,6 +582,10 @@ DotShakeUIKit
 - All public APIs are designed to be called from the main thread (`@MainActor`)
 - `MarkerStorage` is implemented as an `Actor` for thread-safe persistence
 - Configuration structs conform to `Sendable` for safe cross-thread usage
+
+## Dependencies
+
+- [FoundationKit](https://github.com/Humble7/FoundationKit) - For `ErrorMessage` type used in error presentation
 
 ## License
 
