@@ -20,31 +20,31 @@ Supports side floating buttons, bottom accessory views, and space-adaptive layou
 <details>
   <summary><strong>Plain Tool Bar</strong></summary>
   <br/>
-  <img src="docs/1-demo-simple.png" width="300" />
+  <img src="../Assets/1-demo-simple.png" width="300" />
 </details>
 
 <details>
   <summary><strong>Tool Bar with Side Button & Accessory View</strong></summary>
   <br/>
-  <img src="docs/2-1-demo-Acc.png" width="300" />
+  <img src="../Assets/2-1-demo-Acc.png" width="300" />
 </details>
 
 <details>
   <summary><strong>Tool Bar with Dual Accessory Views</strong></summary>
   <br/>
-  <img src="docs/2-2-demo-Acc.png" width="300" />
+  <img src="../Assets/2-2-demo-Acc.png" width="300" />
 </details>
 
 <details>
   <summary><strong>Tool Bar with More Action Menu</strong></summary>
   <br/>
-  <img src="docs/3-demo-more.png" width="300" />
+  <img src="../Assets/3-demo-more.png" width="300" />
 </details>
 
 <details>
   <summary><strong>Adaptive Toolbar Layout for Split View</strong></summary>
   <br/>
-  <img src="docs/4-demo-minimal.png" width="300" />
+  <img src="../Assets/4-demo-minimal.png" width="300" />
 </details>
 
 ## Showcase
